@@ -24,3 +24,11 @@ Bu projenin kopyasını yerel bilgisayarınıza indirin:
   python3 test_kps_service.py
 ```
     
+## Katkıda Bulunma
+Lütfen katkıda bulunmak için pull request açın. Her türlü katkı hoş geldiniz!
+
+## Lisans
+Bu proje MIT lisansı altında lisanslanmıştır. Daha fazla bilgi için LICENSE dosyasına bakın.
+
+## İletişim
+Eğer bir sorunuz veya geri bildiriminiz varsa, lütfen [issues](https://github.com/moneytolia/kpsv2-client/issues) sayfasında bir konu açın.
