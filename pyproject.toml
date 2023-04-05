@@ -3,10 +3,10 @@ name = "kpsv2-client"
 version = "0.1.0"
 description = "A client package for kpsv2.nvi.gov.tr"
 authors = [
-    {name = 'Ülkü Bayraktar', email = 'ulkubayraktar@gmail.com'},
-    {name = 'Ali Eren Öztürk', email = 'oztalieren@gmail.com'},
-    {name = 'Ecem Ekim', email = 'ecemekim3236@gmail.com'},
-    {name = 'Seda Çağlar', email = 'seedacaglar@gmail.com'},
+    "Ülkü Bayraktar <ulkubayraktar@gmail.com>",
+    "Ali Eren Öztürk <oztalieren@gmail.com>",
+    "Ecem Ekim <ecemekim3236@gmail.com>",
+    "Seda Çağlar <seedacaglar@gmail.com>",
 ]
 readme = "README.md"
 packages = [{include = "kpsv2_client"}]
