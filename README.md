@@ -22,7 +22,7 @@ resp = kps_service.bilesik_kutuk_sorgula(identity_number="01234567890", birth_da
 ```
 
 ## Katkıda Bulunma
-Lütfen katkıda bulunmak için pull request açın. Her türlü katkı hoş geldiniz!
+Lütfen katkıda bulunmak için pull request açın. Her türlü katkıya açığız.
 
 
 ## Lisans
