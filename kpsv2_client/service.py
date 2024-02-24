@@ -1,7 +1,7 @@
 import requests
 
 from kpsv2_client.kps_helper import KpsException, _kps_helper
-
+from datetime import datetime
 
 class KpsService:
     def __init__(self, action: str = None, kps_url: str = None, sts_url: str = None):
@@ -78,6 +78,9 @@ class KpsService:
 
         msg_uuid = _kps_helper.create_uuid()
         created, expires = _kps_helper.create_timestamp()
+
+        date_format = '%d.%m.%Y'
+        birth_date = datetime.strptime(birth_date, date_format) if isinstance(birth_date, str) else birth_date
 
         sts_response = _kps_helper.create_sts_request(
             self._security_context, self._headers, created, expires, msg_uuid
