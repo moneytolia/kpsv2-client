@@ -9,14 +9,14 @@ class KpsService:
         self._password = None
         self._action = (
             action
-            or "http://kps.nvi.gov.tr/2023/02/01/BilesikKutukSorgulaKimlikNoServis/Sorgula",
+            or "http://kps.nvi.gov.tr/2023/02/01/BilesikKutukSorgulaKimlikNoServis/Sorgula"
         )
         self._kps_url = (
-            kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc",
+            kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc"
         )
         self._sts_url = (
             sts_url
-            or "https://kimlikdogrulama.nvi.gov.tr/Services/Issuer.svc/IWSTrust13",
+            or "https://kimlikdogrulama.nvi.gov.tr/Services/Issuer.svc/IWSTrust13"
         )
         self._headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
 
