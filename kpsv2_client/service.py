@@ -1,7 +1,7 @@
 import requests
 
 from kpsv2_client.kps_helper import KpsException, _kps_helper
-
+from datetime import datetime
 
 class KpsService:
     def __init__(self, action: str = None, kps_url: str = None, sts_url: str = None):
@@ -9,14 +9,14 @@ class KpsService:
         self._password = None
         self._action = (
             action
-            or "http://kps.nvi.gov.tr/2023/02/01/BilesikKutukSorgulaKimlikNoServis/Sorgula",
+            or "http://kps.nvi.gov.tr/2023/02/01/BilesikKutukSorgulaKimlikNoServis/Sorgula"
         )
         self._kps_url = (
-            kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc",
+            kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc"
         )
         self._sts_url = (
             sts_url
-            or "https://kimlikdogrulama.nvi.gov.tr/Services/Issuer.svc/IWSTrust13",
+            or "https://kimlikdogrulama.nvi.gov.tr/Services/Issuer.svc/IWSTrust13"
         )
         self._headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
 
@@ -78,6 +78,9 @@ class KpsService:
 
         msg_uuid = _kps_helper.create_uuid()
         created, expires = _kps_helper.create_timestamp()
+
+        date_format = '%d.%m.%Y'
+        birth_date = datetime.strptime(birth_date, date_format) if isinstance(birth_date, str) else birth_date
 
         sts_response = _kps_helper.create_sts_request(
             self._security_context, self._headers, created, expires, msg_uuid
