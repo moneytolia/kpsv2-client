@@ -9,7 +9,7 @@ class KpsService:
         self._password = None
         self._action = (
             action
-            or "http://kps.nvi.gov.tr/2023/02/01/BilesikKutukSorgulaKimlikNoServis/Sorgula"
+            or "http://kps.nvi.gov.tr/2024/04/01/BilesikKutukSorgulaKimlikNoServis/Sorgula"
         )
         self._kps_url = (
             kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc"
@@ -44,8 +44,7 @@ class KpsService:
         expires,
         msg_uuid,
         security,
-        birth_date,
-        identity_number,
+        xml_schema
     ):
         data = _kps_helper.kps_xml_schema.format(
             self._security_context["action"],
@@ -60,10 +59,7 @@ class KpsService:
             security["digest_value"],
             security["signature"],
             security["key_identifier_path"],
-            birth_date.month,
-            birth_date.day,
-            birth_date.year,
-            identity_number,
+            xml_schema
         )
 
         response = requests.post(
@@ -86,12 +82,11 @@ class KpsService:
             self._security_context, self._headers, created, expires, msg_uuid
         )
         security = _kps_helper.create_security_data(sts_response, created, expires)
-
+        schema = _kps_helper.bilesik_kutuk_sorgula(birth_date, identity_number)
         return self._send_request(
             created,
             expires,
             msg_uuid,
             security,
-            birth_date,
-            identity_number,
+            schema
         )
