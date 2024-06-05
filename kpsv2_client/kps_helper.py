@@ -54,9 +54,7 @@ class _KpsHelper:
     def xml_to_json(self, response_xml=None, response_element=None):
         response_dict = {}
         if response_xml:
-            root = minidom.parseString(response_xml).getElementsByTagName(
-                "SorguSonucu"
-            )[0]
+            root = minidom.parseString(response_xml).getElementsByTagName("SorguSonucu")[0]
         else:
             root = response_element
 
@@ -82,35 +80,23 @@ class _KpsHelper:
 
     def get_binary_secret(self, root):
         namespace = {"trust": "http://docs.oasis-open.org/ws-sx/ws-trust/200512"}
-        return base64.b64decode(
-            root.find(".//trust:BinarySecret", namespaces=namespace).text
-        )
+        return base64.b64decode(root.find(".//trust:BinarySecret", namespaces=namespace).text)
 
     def get_key_identifier_path(self, root):
-        namespace = {
-            "secext": "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-        }
+        namespace = {"secext": "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"}
         return root.find(".//secext:KeyIdentifier", namespaces=namespace).text
 
     def get_digest_value(self, created, expires):
         timestamp = f'<u:Timestamp xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" u:Id="_0"><u:Created>{created}</u:Created><u:Expires>{expires}</u:Expires></u:Timestamp>'
-        return base64.b64encode(
-            hashlib.sha1(timestamp.encode("utf-8")).digest()
-        ).decode("utf-8")
+        return base64.b64encode(hashlib.sha1(timestamp.encode("utf-8")).digest()).decode("utf-8")
 
     def get_signature(self, binary_secret, digest_value):
         c14n = f'<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#"><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"></CanonicalizationMethod><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#hmac-sha1"></SignatureMethod><Reference URI="#_0"><Transforms><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"></Transform></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"></DigestMethod><DigestValue>{digest_value}</DigestValue></Reference></SignedInfo>'
-        return base64.b64encode(
-            hmac.new(binary_secret, c14n.encode("utf-8"), hashlib.sha1).digest()
-        ).decode("utf-8")
+        return base64.b64encode(hmac.new(binary_secret, c14n.encode("utf-8"), hashlib.sha1).digest()).decode("utf-8")
 
     def create_timestamp(self):
-        created = (datetime.datetime.utcnow() + datetime.timedelta()).strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
-        expires = (datetime.datetime.utcnow() + datetime.timedelta(minutes=5)).strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
+        created = (datetime.datetime.utcnow() + datetime.timedelta()).strftime("%Y-%m-%dT%H:%M:%SZ")
+        expires = (datetime.datetime.utcnow() + datetime.timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         return created, expires
 
@@ -128,9 +114,7 @@ class _KpsHelper:
                 security_context["password"],
                 security_context["kps_url"],
             )
-            response = requests.post(
-                security_context["sts_url"], data=data, headers=headers
-            )
+            response = requests.post(security_context["sts_url"], data=data, headers=headers)
             resp = response.content.decode("utf-8")
         except Exception as e:
             raise KpsException(e)
@@ -158,6 +142,7 @@ class _KpsHelper:
             birth_date.year,
             identity_number,
         )
+
 
 class KpsException(Exception):
     pass

@@ -1,23 +1,17 @@
+from datetime import datetime
+
 import requests
 
 from kpsv2_client.kps_helper import KpsException, _kps_helper
-from datetime import datetime
+
 
 class KpsService:
     def __init__(self, action: str = None, kps_url: str = None, sts_url: str = None):
         self._username = None
         self._password = None
-        self._action = (
-            action
-            or "http://kps.nvi.gov.tr/2024/04/01/BilesikKutukSorgulaKimlikNoServis/Sorgula"
-        )
-        self._kps_url = (
-            kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc"
-        )
-        self._sts_url = (
-            sts_url
-            or "https://kimlikdogrulama.nvi.gov.tr/Services/Issuer.svc/IWSTrust13"
-        )
+        self._action = action or "http://kps.nvi.gov.tr/2024/04/01/BilesikKutukSorgulaKimlikNoServis/Sorgula"
+        self._kps_url = kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc"
+        self._sts_url = sts_url or "https://kimlikdogrulama.nvi.gov.tr/Services/Issuer.svc/IWSTrust13"
         self._headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
 
     @property
@@ -38,14 +32,7 @@ class KpsService:
         if not self._username or not self._password:
             raise KpsException("username and password must be set")
 
-    def _send_request(
-        self,
-        created,
-        expires,
-        msg_uuid,
-        security,
-        xml_schema
-    ):
+    def _send_request(self, created, expires, msg_uuid, security, xml_schema):
         data = _kps_helper.kps_xml_schema.format(
             self._security_context["action"],
             msg_uuid,
@@ -59,34 +46,25 @@ class KpsService:
             security["digest_value"],
             security["signature"],
             security["key_identifier_path"],
-            xml_schema
+            xml_schema,
         )
 
-        response = requests.post(
-            self._security_context["kps_url"], data=data, headers=self._headers
-        )
+        response = requests.post(self._security_context["kps_url"], data=data, headers=self._headers)
         response = _kps_helper.xml_to_json(response.content)
 
         return response
 
-    def bilesik_kutuk_sorgula(self, birth_date: str, identity_number: str):
+    def bilesik_kutuk_sorgula(self, birth_date: datetime, identity_number: str):
         self._check_auth()
 
         msg_uuid = _kps_helper.create_uuid()
         created, expires = _kps_helper.create_timestamp()
 
-        date_format = '%d.%m.%Y'
+        date_format = "%d.%m.%Y"
         birth_date = datetime.strptime(birth_date, date_format) if isinstance(birth_date, str) else birth_date
 
-        sts_response = _kps_helper.create_sts_request(
-            self._security_context, self._headers, created, expires, msg_uuid
-        )
+        sts_response = _kps_helper.create_sts_request(self._security_context, self._headers, created, expires, msg_uuid)
         security = _kps_helper.create_security_data(sts_response, created, expires)
+
         schema = _kps_helper.bilesik_kutuk_sorgula(birth_date, identity_number)
-        return self._send_request(
-            created,
-            expires,
-            msg_uuid,
-            security,
-            schema
-        )
+        return self._send_request(created, expires, msg_uuid, security, schema)
