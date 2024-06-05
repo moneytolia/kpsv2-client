@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "kpsv2-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "A client package for kpsv2.nvi.gov.tr"
 authors = [
     "Ülkü Bayraktar <ulkubayraktar@gmail.com>",
@@ -12,10 +12,18 @@ readme = "README.md"
 packages = [{include = "kpsv2_client"}]
 license = "MIT"
 
+[project.urls]
+Homepage = 'https://github.com/moneytolia/kpsv2-client'
+Source = 'https://github.com/moneytolia/kpsv2-client'
+
 [tool.poetry.dependencies]
 python = "^3.9"
 requests = "^2.28.2"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^6.0.0"
+pytest-mock = "*"
+requests-mock = "^1.12.1"
 
 [build-system]
 requires = ["poetry-core"]
