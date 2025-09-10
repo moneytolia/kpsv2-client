@@ -45,11 +45,29 @@ _kps_data = """<?xml version="1.0"?><s:Envelope xmlns:s="http://www.w3.org/2003/
 bilesik_kutuk_sorgula_schema = """<env:Body xmlns:env="http://www.w3.org/2003/05/soap-envelope" xmlns:ns1="http://kps.nvi.gov.tr/2024/04/01"><ns1:Sorgula><ns1:kriterListesi><ns1:BilesikKutukSorgulaKimlikNoSorguKriteri><ns1:DogumAy>{}</ns1:DogumAy><ns1:DogumGun>{}</ns1:DogumGun><ns1:DogumYil>{}</ns1:DogumYil><ns1:KimlikNo>{}</ns1:KimlikNo></ns1:BilesikKutukSorgulaKimlikNoSorguKriteri></ns1:kriterListesi></ns1:Sorgula></env:Body>"""
 
 
+
+
+kisi_adres_no_sorgula_schema = """<env:Body xmlns:env="http://www.w3.org/2003/05/soap-envelope">
+  <ns1:Sorgula xmlns:ns1="http://kps.nvi.gov.tr/2011/01/01">
+    <ns1:kriter>{criteria}</ns1:kriter>
+  </ns1:Sorgula>
+</env:Body>"""
+
+def _build_kisi_adres_kriter(kimlik_no=None, seri_no=None):
+    parts = []
+    if kimlik_no:
+        parts.append(f"<ns1:KimlikNo>{kimlik_no}</ns1:KimlikNo>")
+    if seri_no:
+        parts.append(f"<ns1:SeriNo>{seri_no}</ns1:SeriNo>")
+    return "".join(parts)
+
+
 class _KpsHelper:
     def __init__(self):
         self.sts_xml_schema = _sts_data
         self.kps_xml_schema = _kps_data
         self.bilesik_kutuk_sorgula_xml_schema = bilesik_kutuk_sorgula_schema
+        self.kisi_adres_no_sorgula_xml_schema = kisi_adres_no_sorgula_schema
 
     def xml_to_json(self, response_xml=None, response_element=None):
         response_dict = {}
@@ -149,3 +167,8 @@ class KpsException(Exception):
 
 
 _kps_helper = _KpsHelper()
+
+
+    def kisi_adres_no_sorgula(self, kimlik_no=None, seri_no=None):
+        criteria = _build_kisi_adres_kriter(kimlik_no, seri_no)
+        return self.kisi_adres_no_sorgula_xml_schema.format(criteria=criteria)

@@ -68,3 +68,29 @@ class KpsService:
 
         schema = _kps_helper.bilesik_kutuk_sorgula(birth_date, identity_number)
         return self._send_request(created, expires, msg_uuid, security, schema)
+
+
+    def kisi_adres_no_sorgula(self, kimlik_no: str = None, seri_no: str = None):
+        """
+        KisiAdresNoSorgulaServis/Sorgula
+        At least one of kimlik_no or seri_no must be provided.
+        """
+        if not kimlik_no and not seri_no:
+            raise KpsException("kimlik_no veya seri_no parametrelerinden en az biri verilmelidir.")
+        self._check_auth()
+
+        msg_uuid = _kps_helper.create_uuid()
+        created, expires = _kps_helper.create_timestamp()
+
+        sts_response = _kps_helper.create_sts_request(self._security_context, self._headers, created, expires, msg_uuid)
+        security = _kps_helper.create_security_data(sts_response, created, expires)
+
+        schema = _kps_helper.kisi_adres_no_sorgula(kimlik_no=kimlik_no, seri_no=seri_no)
+
+        # override action just for this call
+        original_action = self._action
+        try:
+            self._action = "http://kps.nvi.gov.tr/2011/01/01/KisiAdresNoSorgulaServis/Sorgula"
+            return self._send_request(created, expires, msg_uuid, security, schema)
+        finally:
+            self._action = original_action
