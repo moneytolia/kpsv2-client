@@ -3,15 +3,16 @@ from datetime import datetime
 import requests
 
 from kpsv2_client.kps_helper import KpsException, _kps_helper
+from kpsv2_client.config import settings
 
 
 class KpsService:
     def __init__(self, action: str = None, kps_url: str = None, sts_url: str = None):
         self._username = None
         self._password = None
-        self._action = action or "http://kps.nvi.gov.tr/2024/04/01/BilesikKutukSorgulaKimlikNoServis/Sorgula"
-        self._kps_url = kps_url or "https://kpsv2test.nvi.gov.tr/Services/RoutingService.svc"
-        self._sts_url = sts_url or "https://kimlikdogrulama.nvi.gov.tr/Services/Issuer.svc/IWSTrust13"
+        self._action = action or settings["bilesik_kutuk_sorgula"]
+        self._kps_url = kps_url or settings["kps_url"]
+        self._sts_url = sts_url or settings["sts_url"]
         self._headers = {"Content-Type": "application/soap+xml; charset=utf-8"}
 
     @property
@@ -32,9 +33,10 @@ class KpsService:
         if not self._username or not self._password:
             raise KpsException("username and password must be set")
 
-    def _send_request(self, created, expires, msg_uuid, security, xml_schema):
+    def _send_request(self, created, expires, msg_uuid, security, xml_schema, action=None):
+        effective_action = action or self._security_context["action"]
         data = _kps_helper.kps_xml_schema.format(
-            self._security_context["action"],
+            effective_action,
             msg_uuid,
             self._security_context["kps_url"],
             created,
@@ -51,12 +53,10 @@ class KpsService:
 
         response = requests.post(self._security_context["kps_url"], data=data, headers=self._headers)
         response = _kps_helper.xml_to_json(response.content)
-
         return response
 
     def bilesik_kutuk_sorgula(self, birth_date: datetime, identity_number: str):
         self._check_auth()
-
         msg_uuid = _kps_helper.create_uuid()
         created, expires = _kps_helper.create_timestamp()
 
@@ -69,12 +69,8 @@ class KpsService:
         schema = _kps_helper.bilesik_kutuk_sorgula(birth_date, identity_number)
         return self._send_request(created, expires, msg_uuid, security, schema)
 
-
     def kisi_adres_no_sorgula(self, kimlik_no: str = None, seri_no: str = None):
-        """
-        KisiAdresNoSorgulaServis/Sorgula
-        At least one of kimlik_no or seri_no must be provided.
-        """
+        """KisiAdresNoSorgulaServis/Sorgula — at least one of the params must be given."""
         if not kimlik_no and not seri_no:
             raise KpsException("kimlik_no veya seri_no parametrelerinden en az biri verilmelidir.")
         self._check_auth()
@@ -86,11 +82,4 @@ class KpsService:
         security = _kps_helper.create_security_data(sts_response, created, expires)
 
         schema = _kps_helper.kisi_adres_no_sorgula(kimlik_no=kimlik_no, seri_no=seri_no)
-
-        # override action just for this call
-        original_action = self._action
-        try:
-            self._action = "http://kps.nvi.gov.tr/2011/01/01/KisiAdresNoSorgulaServis/Sorgula"
-            return self._send_request(created, expires, msg_uuid, security, schema)
-        finally:
-            self._action = original_action
+        return self._send_request(created, expires, msg_uuid, security, schema, action=settings["kisi_adres_no_sorgula"])

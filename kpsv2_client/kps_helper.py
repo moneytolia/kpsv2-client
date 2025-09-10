@@ -8,8 +8,7 @@ from xml.dom import minidom
 
 import requests
 
-_sts_data = """
-<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+_sts_data = """<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
   <s:Header>
     <a:Action s:mustUnderstand="1">http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue</a:Action>
     <a:MessageID>urn:uuid:{}</a:MessageID>
@@ -42,16 +41,27 @@ _sts_data = """
 """
 
 _kps_data = """<?xml version="1.0"?><s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><a:Action s:mustUnderstand="1">{}</a:Action><a:MessageID>urn:uuid:{}</a:MessageID><a:ReplyTo><a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address></a:ReplyTo><a:To s:mustUnderstand="1">{}</a:To><o:Security xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" s:mustUnderstand="1"><u:Timestamp u:Id="_0"><u:Created>{}</u:Created><u:Expires>{}</u:Expires></u:Timestamp><xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" Type="http://www.w3.org/2001/04/xmlenc#Element"><xenc:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"/><KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"><e:EncryptedKey xmlns:e="http://www.w3.org/2001/04/xmlenc#"><e:EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/></e:EncryptionMethod><KeyInfo><o:SecurityTokenReference><X509Data><X509IssuerSerial><X509IssuerName>{}</X509IssuerName><X509SerialNumber>{}</X509SerialNumber></X509IssuerSerial></X509Data></o:SecurityTokenReference></KeyInfo><e:CipherData><e:CipherValue>{}</e:CipherValue></e:CipherData></e:EncryptedKey></KeyInfo><xenc:CipherData><xenc:CipherValue>{}</xenc:CipherValue></xenc:CipherData></xenc:EncryptedData><Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#hmac-sha1"/><Reference URI="#_0"><Transforms><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><DigestValue>{}</DigestValue></Reference></SignedInfo><SignatureValue>{}</SignatureValue><KeyInfo><o:SecurityTokenReference xmlns:k="http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd" k:TokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1"><o:KeyIdentifier ValueType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.0#SAMLAssertionID">{}</o:KeyIdentifier></o:SecurityTokenReference></KeyInfo></Signature></o:Security></s:Header>{}</s:Envelope>"""
-bilesik_kutuk_sorgula_schema = """<env:Body xmlns:env="http://www.w3.org/2003/05/soap-envelope" xmlns:ns1="http://kps.nvi.gov.tr/2024/04/01"><ns1:Sorgula><ns1:kriterListesi><ns1:BilesikKutukSorgulaKimlikNoSorguKriteri><ns1:DogumAy>{}</ns1:DogumAy><ns1:DogumGun>{}</ns1:DogumGun><ns1:DogumYil>{}</ns1:DogumYil><ns1:KimlikNo>{}</ns1:KimlikNo></ns1:BilesikKutukSorgulaKimlikNoSorguKriteri></ns1:kriterListesi></ns1:Sorgula></env:Body>"""
 
-
-
+bilesik_kutuk_sorgula_schema = """<env:Body xmlns:env="http://www.w3.org/2003/05/soap-envelope" xmlns:ns1="http://kps.nvi.gov.tr/2024/04/01">
+  <ns1:Sorgula>
+    <ns1:kriterListesi>
+      <ns1:BilesikKutukSorgulaKimlikNoSorguKriteri>
+        <ns1:DogumAy>{}</ns1:DogumAy>
+        <ns1:DogumGun>{}</ns1:DogumGun>
+        <ns1:DogumYil>{}</ns1:DogumYil>
+        <ns1:KimlikNo>{}</ns1:KimlikNo>
+      </ns1:BilesikKutukSorgulaKimlikNoSorguKriteri>
+    </ns1:kriterListesi>
+  </ns1:Sorgula>
+</env:Body>
+"""
 
 kisi_adres_no_sorgula_schema = """<env:Body xmlns:env="http://www.w3.org/2003/05/soap-envelope">
   <ns1:Sorgula xmlns:ns1="http://kps.nvi.gov.tr/2011/01/01">
     <ns1:kriter>{criteria}</ns1:kriter>
   </ns1:Sorgula>
-</env:Body>"""
+</env:Body>
+"""
 
 def _build_kisi_adres_kriter(kimlik_no=None, seri_no=None):
     parts = []
@@ -81,7 +91,6 @@ class _KpsHelper:
                 response_dict[e.nodeName] = self.xml_to_json(response_element=e)
             elif e.nodeType == e.TEXT_NODE:
                 return e.data
-
         return response_dict
 
     def get_issuer_name(self, xml_doc):
@@ -115,7 +124,6 @@ class _KpsHelper:
     def create_timestamp(self):
         created = (datetime.datetime.utcnow() + datetime.timedelta()).strftime("%Y-%m-%dT%H:%M:%SZ")
         expires = (datetime.datetime.utcnow() + datetime.timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
-
         return created, expires
 
     def create_uuid(self):
@@ -136,14 +144,12 @@ class _KpsHelper:
             resp = response.content.decode("utf-8")
         except Exception as e:
             raise KpsException(e)
-
         return resp
 
     def create_security_data(self, sts_token, created, expires):
         xml_doc = ET.fromstring(sts_token)
         binary_secret = self.get_binary_secret(xml_doc)
         digest_value = self.get_digest_value(created, expires)
-
         return {
             "issuer_name": self.get_issuer_name(xml_doc),
             "serial_number": self.get_serial_number(xml_doc),
@@ -161,14 +167,13 @@ class _KpsHelper:
             identity_number,
         )
 
+    def kisi_adres_no_sorgula(self, kimlik_no=None, seri_no=None):
+        criteria = _build_kisi_adres_kriter(kimlik_no, seri_no)
+        return self.kisi_adres_no_sorgula_xml_schema.format(criteria=criteria)
+
 
 class KpsException(Exception):
     pass
 
 
 _kps_helper = _KpsHelper()
-
-
-    def kisi_adres_no_sorgula(self, kimlik_no=None, seri_no=None):
-        criteria = _build_kisi_adres_kriter(kimlik_no, seri_no)
-        return self.kisi_adres_no_sorgula_xml_schema.format(criteria=criteria)
